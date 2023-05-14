@@ -167,4 +167,13 @@ class Connection extends \Doctrine\DBAL\Connection
     {
         throw Exception::notSupported(__METHOD__);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getNativeConnection(): object
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
 }

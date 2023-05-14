@@ -15,10 +15,8 @@ declare(strict_types=1);
 namespace FOD\DBALClickHouse;
 
 use ClickHouseDB\Client;
-use ClickHouseDB\Exception\ClickHouseException;
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Driver\Result;
-use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
 use Doctrine\DBAL\Driver\Statement;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
@@ -26,7 +24,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 use function array_merge;
 
-class ClickHouseConnection implements Connection, ServerInfoAwareConnection
+class ClickHouseConnection implements Connection
 {
     protected Client $client;
 
@@ -69,7 +67,7 @@ class ClickHouseConnection implements Connection, ServerInfoAwareConnection
     /**
      * {@inheritDoc}
      */
-    public function quote($value, $type = ParameterType::STRING)
+    public function quote($value, $type = ParameterType::STRING):mixed
     {
         if ($type === ParameterType::STRING) {
             return $this->platform->quoteStringLiteral($value);
@@ -89,7 +87,7 @@ class ClickHouseConnection implements Connection, ServerInfoAwareConnection
     /**
      * {@inheritDoc}
      */
-    public function lastInsertId($name = null)
+    public function lastInsertId($name = null): bool|int|string
     {
         throw Exception::notSupported(__METHOD__);
     }
@@ -118,15 +116,4 @@ class ClickHouseConnection implements Connection, ServerInfoAwareConnection
         throw Exception::notSupported(__METHOD__);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getServerVersion(): string
-    {
-        try {
-            return $this->client->getServerVersion();
-        } catch (ClickHouseException) {
-            return '';
-        }
-    }
 }
