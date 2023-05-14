@@ -135,7 +135,7 @@ class ClickHouseStatement implements Statement
             }
             return new ClickHouseResult(new \ArrayIterator($this->clientStatement->rows()),
                 $this->clientStatement->totals(),
-                $this->clientStatement->countAll());
+                (int)$this->clientStatement->countAll());
         } catch (ClickHouseException $exception) {
             throw new Exception(previous: $exception, sqlState: $exception->getMessage());
         }
