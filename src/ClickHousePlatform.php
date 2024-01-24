@@ -603,14 +603,6 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDropConstraintSQL($constraint, $table): string
-    {
-        throw Exception::notSupported(__METHOD__);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function getDropForeignKeySQL($foreignKey, $table): string
     {
         throw Exception::notSupported(__METHOD__);
@@ -1022,10 +1014,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getListDatabasesSQL(): string
-    {
-        return 'SHOW DATABASES';
-    }
+
 
     /**
      * {@inheritDoc}
@@ -1044,14 +1033,6 @@ class ClickHousePlatform extends AbstractPlatform
     public function getListTablesSQL(): string
     {
         return "SELECT database, name FROM system.tables WHERE database != 'system' AND engine != 'View'";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getListViewsSQL($database): string
-    {
-        return "SELECT name FROM system.tables WHERE database != 'system' AND engine = 'View'";
     }
 
     /**

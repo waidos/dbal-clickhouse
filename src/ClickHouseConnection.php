@@ -69,7 +69,7 @@ class ClickHouseConnection implements Connection, ServerInfoAwareConnection
     /**
      * {@inheritDoc}
      */
-    public function quote($value, $type = ParameterType::STRING)
+    public function quote($value, $type = ParameterType::STRING):mixed
     {
         if ($type === ParameterType::STRING) {
             return $this->platform->quoteStringLiteral($value);
@@ -89,7 +89,7 @@ class ClickHouseConnection implements Connection, ServerInfoAwareConnection
     /**
      * {@inheritDoc}
      */
-    public function lastInsertId($name = null)
+    public function lastInsertId($name = null):string|int|false
     {
         throw Exception::notSupported(__METHOD__);
     }
@@ -128,5 +128,9 @@ class ClickHouseConnection implements Connection, ServerInfoAwareConnection
         } catch (ClickHouseException) {
             return '';
         }
+    }
+    public function getNativeConnection()
+    {
+        return $this->connection->getNativeConnection();
     }
 }
