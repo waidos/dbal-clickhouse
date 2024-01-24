@@ -18,11 +18,11 @@ use Doctrine\DBAL\Driver\Result;
 
 class ClickHouseResult implements Result
 {
-    public function __construct(private ?\ArrayIterator $iterator)
+    public function __construct(private ?\ArrayIterator $iterator, private ?array $totals, private ?int $countAll)
     {
     }
 
-    public function fetchNumeric()
+    public function fetchNumeric(): array|false
     {
         $row = $this->iterator->current();
 
@@ -35,7 +35,7 @@ class ClickHouseResult implements Result
         return array_values($row);
     }
 
-    public function fetchAssociative()
+    public function fetchAssociative(): array|false
     {
         $row = $this->iterator->current();
 
@@ -48,7 +48,7 @@ class ClickHouseResult implements Result
         return $row;
     }
 
-    public function fetchOne()
+    public function fetchOne(): array|false
     {
         $row = $this->iterator->current();
 
@@ -68,7 +68,11 @@ class ClickHouseResult implements Result
 
     public function fetchAllAssociative(): array
     {
-        return $this->iterator->getArrayCopy();
+        return [
+            'result'     => $this->iterator->getArrayCopy(),
+            'totals'     => $this->totals,
+            'total_rows' => $this->countAll
+        ];
     }
 
     public function fetchFirstColumn(): array

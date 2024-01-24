@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FOD\DBALClickHouse;
 
 use ClickHouseDB\Client;
+use ClickHouseDB\Statement as ClientStatement;
 use ClickHouseDB\Exception\ClickHouseException;
 use Doctrine\DBAL\Driver\Result;
 use Doctrine\DBAL\Driver\Statement;
@@ -36,6 +37,9 @@ use function mb_stripos;
 class ClickHouseStatement implements Statement
 {
     protected Client $client;
+
+    /** @var ClientStatement */
+    protected ClientStatement $clientStatement;
 
     protected string $statement;
 
@@ -120,15 +124,18 @@ class ClickHouseStatement implements Statement
         }
 
         try {
-            return new ClickHouseResult(
-                new \ArrayIterator(
-                    mb_stripos($statement, 'select') === 0 ||
-                    mb_stripos($statement, 'show') === 0 ||
-                    mb_stripos($statement, 'describe') === 0
-                        ? $this->client->select($statement)->rows()
-                        : $this->client->write($statement)->rows()
-                )
-            );
+            if (
+                mb_stripos($statement, 'select') === 0 ||
+                mb_stripos($statement, 'show') === 0 ||
+                mb_stripos($statement, 'describe') === 0
+            ) {
+                $this->clientStatement = $this->client->select($statement);
+            } else {
+                $this->clientStatement = $this->client->write($statement);
+            }
+            return new ClickHouseResult(new \ArrayIterator($this->clientStatement->rows()),
+                $this->clientStatement->totals(),
+                (int)$this->clientStatement->countAll());
         } catch (ClickHouseException $exception) {
             throw new Exception(previous: $exception, sqlState: $exception->getMessage());
         }
@@ -172,9 +179,9 @@ class ClickHouseStatement implements Statement
         }
 
         return match ($type) {
-            ParameterType::INTEGER => (string) $value,
-            ParameterType::BOOLEAN => (string) (int) (bool) $value,
-            default => $this->platform->quoteStringLiteral((string) $value)
+            ParameterType::INTEGER => (string)$value,
+            ParameterType::BOOLEAN => (string)(int)(bool)$value,
+            default => $this->platform->quoteStringLiteral((string)$value)
         };
     }
 }
